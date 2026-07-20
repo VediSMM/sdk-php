@@ -6,6 +6,11 @@
 
 Pass either a token string or a zero-argument callback. The callback is evaluated for each authenticated request and is useful for short-lived tokens. The SDK does not write credentials to disk. Do not log `CallOptions` or application-owned token callbacks.
 
+Authenticated calls send the same in-memory credential through both
+`Authorization: Bearer` and VediSMM's `X-API-Token` proxy fallback. The API
+gives `Authorization` priority. Both headers are SDK-managed, cannot be
+overridden through `CallOptions`, and must never be logged.
+
 ## Calling operations
 
 Use named service methods for normal application code. Each one delegates to `Client::call()` and accepts `CallOptions`:

@@ -36,6 +36,7 @@ final class ClientTest extends TestCase
 
         self::assertSame('https://vedismm.ru/api/v1/webhooks/hook%20%2F%201/deliveries/delivery%3F2?include=attempts&include=response&active=true', $transport->requests[0]->url);
         self::assertSame('Bearer pat_secret', $transport->requests[0]->headers['Authorization']);
+        self::assertSame('pat_secret', $transport->requests[0]->headers['X-API-Token']);
         self::assertSame('"v1"', $transport->requests[0]->headers['If-Match']);
         self::assertNull($transport->requests[0]->body);
         self::assertSame('req_123', $response->requestId);
@@ -53,6 +54,14 @@ final class ClientTest extends TestCase
 
         $this->expectException(RedirectException::class);
         (new Client(new Config('pat_secret'), $transport))->call('getMe');
+    }
+
+    public function testRejectsCustomFallbackCredentialHeader(): void
+    {
+        $this->expectException(ConfigurationException::class);
+        (new Client(transport: new FakeTransport([])))->call('ping', new CallOptions(
+            headers: ['X-API-Token' => 'attacker'],
+        ));
     }
 
     public function testRetriesRateLimitOnlyWithStableIdempotencyKeyAndHonorsRetryAfter(): void

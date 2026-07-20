@@ -127,13 +127,14 @@ final class Client
                 || preg_match('/[\x00-\x1F\x7F]/D', $value) === 1) {
                 throw new ConfigurationException('invalid request header');
             }
-            if (\in_array(strtolower($name), ['authorization', 'host', 'content-length'], true)) {
+            if (\in_array(strtolower($name), ['authorization', 'x-api-token', 'host', 'content-length'], true)) {
                 throw new ConfigurationException('reserved request header: ' . $name);
             }
             $headers[$name] = $value;
         }
         if ($token !== null) {
             $headers['Authorization'] = 'Bearer ' . $token;
+            $headers['X-API-Token'] = $token;
         }
         if ($options->idempotencyKey !== null) {
             self::validateHeaderValue('idempotencyKey', $options->idempotencyKey);

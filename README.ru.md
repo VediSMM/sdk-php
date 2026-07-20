@@ -16,7 +16,7 @@
 
 ```bash
 composer config repositories.vedismm-sdk vcs https://github.com/VediSMM/sdk-php
-composer require vedismm/sdk:0.1.0
+composer require vedismm/sdk:0.1.1
 ```
 
 ## Быстрый старт
