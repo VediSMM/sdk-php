@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace VediSMM\Value;
 
-/** @template T */
+/** @template-covariant T */
 final class ApiResponse
 {
     /**

@@ -1,6 +1,6 @@
 # VediSMM PHP SDK
 
-Официальный нативный PHP-клиент для всех 83 операций пользовательского API VediSMM v1. Административного API в пакете нет.
+Официальный нативный PHP-клиент для всех 94 операций пользовательского API VediSMM v1. Административного API в пакете нет.
 
 [English](README.md) · [Документация API](https://vedismm.ru/docs/api) · [Политика безопасности](SECURITY.md)
 
@@ -38,7 +38,28 @@ $me = $sdk->profile->getMe();
 echo $me->data['data']['email'] . PHP_EOL;
 ```
 
-Фасад предоставляет сервисы `system`, `auth`, `profile`, `sessions`, `audit`, `personalTokens`, `preferences`, `networks`, `connections`, `accounts`, `groups`, `media`, `posts`, `jobs`, `calendar`, `analytics` и `webhooks`. Каждый метод принимает необязательный immutable-объект `CallOptions`.
+Фасад предоставляет сервисы `system`, `auth`, `profile`, `sessions`, `audit`, `personalTokens`, `preferences`, `networks`, `connections`, `accounts`, `groups`, `media`, `posts`, `jobs`, `calendar`, `analytics`, `trackingLinks`, `trackingAnalytics` и `webhooks`. Generic-сервисы принимают необязательный immutable-объект `CallOptions`, а специализированные tracking-сервисы добавляют типизированные request arrays и ответы.
+
+## Трекинговые ссылки и аналитика кликов
+
+```php
+use VediSMM\Value\CallOptions;
+
+$link = $sdk->trackingLinks()->create(
+    ['destination_url' => 'https://example.com/article'],
+    CallOptions::idempotent('article-v1'),
+);
+
+$summary = $sdk->trackingAnalytics()->summary([
+    'from' => '2026-08-01',
+    'to' => '2026-08-13',
+]);
+```
+
+Destination неизменяем, поэтому метода update нет. SDK передаёт URL без
+изменений; сокращение, source attribution и privacy-safe агрегация выполняются
+на сервере. Для disable/archive используйте `CallOptions::ifMatch($etag)`, а
+list helpers следуют по server cursors через существующий `Paginator`.
 
 ## Безопасные настройки по умолчанию
 
@@ -49,4 +70,4 @@ echo $me->data['data']['email'] . PHP_EOL;
 - Скачивание поддерживает caller-owned sink, загрузка — stream и cURL multipart.
 - Подпись webhook проверяется по исходным байтам и может использовать атомарное replay-хранилище.
 
-Подробности находятся в [русском руководстве](docs/ru/guide.md) и [справочнике методов](docs/ru/api-reference.md).
+Подробности о tracking settings, аналитике, pagination и ETag находятся в [русском руководстве](docs/ru/guide.md) и [справочнике методов](docs/ru/api-reference.md).

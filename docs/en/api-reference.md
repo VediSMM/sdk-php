@@ -1,6 +1,6 @@
 # PHP SDK API reference
 
-The facade exposes exactly the 83 user API v1 operations below. Administrative operations are intentionally absent.
+The facade exposes exactly the 94 user API v1 operations below. Administrative operations are intentionally absent.
 
 Every method accepts an optional `VediSMM\Value\CallOptions` and returns `VediSMM\Value\ApiResponse`.
 
@@ -97,13 +97,13 @@ Every method accepts an optional `VediSMM\Value\CallOptions` and returns `VediSM
 ## `posts`
 
 - `checkPostConstraints(?CallOptions $options = null)`
-- `createPostDraft(?CallOptions $options = null)`
+- `createPostDraft(array|CallOptions|null $options = null, ?CallOptions $callOptions = null)` accepts a typed `PostCreateRequest` array or the original low-level `CallOptions` form.
 - `deletePostDraft(?CallOptions $options = null)`
 - `getPost(?CallOptions $options = null)`
 - `listPosts(?CallOptions $options = null)`
 - `schedulePost(?CallOptions $options = null)`
 - `unschedulePost(?CallOptions $options = null)`
-- `updatePostDraft(?CallOptions $options = null)`
+- `updatePostDraft(array|CallOptions|null $options = null, ?CallOptions $callOptions = null)` accepts a typed `PostUpdateRequest` array or the original low-level `CallOptions` form.
 
 ## `jobs`
 
@@ -124,6 +124,33 @@ Every method accepts an optional `VediSMM\Value\CallOptions` and returns `VediSM
 - `getAnalyticsSummary(?CallOptions $options = null)`
 - `getAnalyticsTimeseries(?CallOptions $options = null)`
 - `listAnalyticsPosts(?CallOptions $options = null)`
+
+## `trackingLinks`
+
+The focused tracking-links service exposes typed array shapes in PHPDoc and
+returns `ApiResponse<TrackingLinkResponse>` values. Destination URLs are
+immutable: there is no update method.
+
+- `create(array $data, ?CallOptions $options = null)` — `createTrackingLink(...)`; pass `array{destination_url: string}` and `CallOptions::idempotent($key)`.
+- `list(array $query = [], ?CallOptions $options = null)` — `listTrackingLinks(...)`; query shape is `array{cursor?: string, limit?: int}`.
+- `iterate(array $query = [], ?CallOptions $options = null)` lazily follows `meta.next_cursor` through `Paginator`.
+- `get(int $id, ?CallOptions $options = null)` — `getTrackingLink(...)`.
+- `disable(int $id, ?CallOptions $options = null)` — `disableTrackingLink(...)`; pass the current ETag with `CallOptions::ifMatch($etag)`.
+- `archive(int $id, ?CallOptions $options = null)` — `archiveTrackingLink(...)`; pass the current ETag with `CallOptions::ifMatch($etag)`.
+
+## `trackingAnalytics`
+
+Every method accepts required `from`/`to` ISO dates and optional `link_id`,
+`post_id`, and canonical request `network`. Response network keys remain open
+strings for forward compatibility.
+
+- `summary(array $query, ?CallOptions $options = null)` — `getTrackingAnalyticsSummary(...)`.
+- `timeseries(array $query, ?CallOptions $options = null)` — `getTrackingAnalyticsTimeseries(...)`.
+- `links(array $query, ?CallOptions $options = null)` — `listTrackingAnalyticsLinks(...)`.
+- `posts(array $query, ?CallOptions $options = null)` — `listTrackingAnalyticsPosts(...)`.
+- `sources(array $query, ?CallOptions $options = null)` — `listTrackingAnalyticsSources(...)`.
+- `geo(array $query, ?CallOptions $options = null)` — `getTrackingAnalyticsGeo(...)`.
+- `iterateLinks(...)`, `iteratePosts(...)`, and `iterateSources(...)` preserve the initial filters and lazily follow only opaque server cursors through `Paginator`.
 
 ## `webhooks`
 

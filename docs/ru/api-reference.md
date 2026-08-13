@@ -1,6 +1,6 @@
 # Справочник методов PHP SDK
 
-Фасад предоставляет ровно 83 операции пользовательского API v1. Административных методов намеренно нет.
+Фасад предоставляет ровно 94 операции пользовательского API v1. Административных методов намеренно нет.
 
 Каждый метод принимает необязательный `VediSMM\Value\CallOptions` и возвращает `VediSMM\Value\ApiResponse`.
 
@@ -97,13 +97,13 @@
 ## `posts`
 
 - `checkPostConstraints(?CallOptions $options = null)`
-- `createPostDraft(?CallOptions $options = null)`
+- `createPostDraft(array|CallOptions|null $options = null, ?CallOptions $callOptions = null)` принимает типизированный `PostCreateRequest` array или исходную low-level форму `CallOptions`.
 - `deletePostDraft(?CallOptions $options = null)`
 - `getPost(?CallOptions $options = null)`
 - `listPosts(?CallOptions $options = null)`
 - `schedulePost(?CallOptions $options = null)`
 - `unschedulePost(?CallOptions $options = null)`
-- `updatePostDraft(?CallOptions $options = null)`
+- `updatePostDraft(array|CallOptions|null $options = null, ?CallOptions $callOptions = null)` принимает типизированный `PostUpdateRequest` array или исходную low-level форму `CallOptions`.
 
 ## `jobs`
 
@@ -124,6 +124,33 @@
 - `getAnalyticsSummary(?CallOptions $options = null)`
 - `getAnalyticsTimeseries(?CallOptions $options = null)`
 - `listAnalyticsPosts(?CallOptions $options = null)`
+
+## `trackingLinks`
+
+Специализированный сервис описывает типизированные array shapes через PHPDoc и
+возвращает `ApiResponse<TrackingLinkResponse>`. Destination неизменяем: метода
+обновления нет.
+
+- `create(array $data, ?CallOptions $options = null)` — `createTrackingLink(...)`; передайте `array{destination_url: string}` и `CallOptions::idempotent($key)`.
+- `list(array $query = [], ?CallOptions $options = null)` — `listTrackingLinks(...)`; форма query: `array{cursor?: string, limit?: int}`.
+- `iterate(array $query = [], ?CallOptions $options = null)` лениво следует по `meta.next_cursor` через `Paginator`.
+- `get(int $id, ?CallOptions $options = null)` — `getTrackingLink(...)`.
+- `disable(int $id, ?CallOptions $options = null)` — `disableTrackingLink(...)`; текущий ETag передаётся через `CallOptions::ifMatch($etag)`.
+- `archive(int $id, ?CallOptions $options = null)` — `archiveTrackingLink(...)`; текущий ETag передаётся через `CallOptions::ifMatch($etag)`.
+
+## `trackingAnalytics`
+
+Каждый метод принимает обязательные ISO-даты `from`/`to` и необязательные
+`link_id`, `post_id` и канонический request `network`. Ключ сети в ответе остаётся
+открытой строкой для прямой совместимости с будущими сетями.
+
+- `summary(array $query, ?CallOptions $options = null)` — `getTrackingAnalyticsSummary(...)`.
+- `timeseries(array $query, ?CallOptions $options = null)` — `getTrackingAnalyticsTimeseries(...)`.
+- `links(array $query, ?CallOptions $options = null)` — `listTrackingAnalyticsLinks(...)`.
+- `posts(array $query, ?CallOptions $options = null)` — `listTrackingAnalyticsPosts(...)`.
+- `sources(array $query, ?CallOptions $options = null)` — `listTrackingAnalyticsSources(...)`.
+- `geo(array $query, ?CallOptions $options = null)` — `getTrackingAnalyticsGeo(...)`.
+- `iterateLinks(...)`, `iteratePosts(...)` и `iterateSources(...)` сохраняют исходные фильтры и лениво следуют только по непрозрачным server cursors через `Paginator`.
 
 ## `webhooks`
 

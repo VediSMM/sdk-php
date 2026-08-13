@@ -54,7 +54,9 @@ foreach ($ownership as $operations) {
         $owned[$operation] = true;
     }
 }
-if (count($catalog) !== 83 || count($owned) !== 83 || array_diff(array_keys($catalog), array_keys($owned)) !== []) {
+$missingOwnership = array_diff(array_keys($catalog), array_keys($owned));
+$unknownOwnership = array_diff(array_keys($owned), array_keys($catalog));
+if (count($catalog) !== 94 || count($owned) !== 94 || $missingOwnership !== [] || $unknownOwnership !== []) {
     fwrite(STDERR, "Operation catalog and service ownership differ\n");
     exit(1);
 }
@@ -66,4 +68,4 @@ foreach (array_keys($catalog) as $operation) {
     }
 }
 
-fwrite(STDOUT, "Documentation covers all 83 operations in English and Russian.\n");
+fwrite(STDOUT, "Documentation covers all 94 operations in English and Russian.\n");

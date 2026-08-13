@@ -1,6 +1,6 @@
 # VediSMM PHP SDK
 
-Official native PHP client for all 83 operations of the VediSMM user API v1. The package contains no administrative API.
+Official native PHP client for all 94 operations of the VediSMM user API v1. The package contains no administrative API.
 
 [Русская версия](README.ru.md) · [API documentation](https://vedismm.ru/docs/api) · [Security policy](SECURITY.md)
 
@@ -38,7 +38,29 @@ $me = $sdk->profile->getMe();
 echo $me->data['data']['email'] . PHP_EOL;
 ```
 
-The facade exposes `system`, `auth`, `profile`, `sessions`, `audit`, `personalTokens`, `preferences`, `networks`, `connections`, `accounts`, `groups`, `media`, `posts`, `jobs`, `calendar`, `analytics`, and `webhooks` services. Every service method accepts an optional immutable `CallOptions` value object.
+The facade exposes `system`, `auth`, `profile`, `sessions`, `audit`, `personalTokens`, `preferences`, `networks`, `connections`, `accounts`, `groups`, `media`, `posts`, `jobs`, `calendar`, `analytics`, `trackingLinks`, `trackingAnalytics`, and `webhooks` services. Generic services accept an optional immutable `CallOptions`; focused tracking services add typed request arrays and responses.
+
+## Tracking links and click analytics
+
+```php
+use VediSMM\Value\CallOptions;
+
+$link = $sdk->trackingLinks()->create(
+    ['destination_url' => 'https://example.com/article'],
+    CallOptions::idempotent('article-v1'),
+);
+
+$summary = $sdk->trackingAnalytics()->summary([
+    'from' => '2026-08-01',
+    'to' => '2026-08-13',
+]);
+```
+
+Destinations are immutable and there is no update method. The SDK sends URLs
+unchanged; shortening, source attribution, and privacy-safe aggregation are
+server responsibilities. Disable/archive calls use
+`CallOptions::ifMatch($etag)`, and list helpers follow server cursors through
+the existing `Paginator`.
 
 ## Safety defaults
 
@@ -49,4 +71,4 @@ The facade exposes `system`, `auth`, `profile`, `sessions`, `audit`, `personalTo
 - Downloads can stream into a caller-owned sink; uploads accept streams or cURL multipart fields.
 - Webhook verification signs the original bytes and supports an atomic replay store.
 
-See the [English guide](docs/en/guide.md) and [API reference](docs/en/api-reference.md) for pagination, ETags, media, jobs, and webhooks.
+See the [English guide](docs/en/guide.md) and [API reference](docs/en/api-reference.md) for tracking settings, click analytics, pagination, ETags, media, jobs, and webhooks.

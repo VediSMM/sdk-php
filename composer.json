@@ -42,7 +42,9 @@
     "secrets:check": "@php scripts/check_secrets.php",
     "artifact:build": ["@php scripts/prepare_dist.php", "composer archive --format=zip --dir=dist --file=vedismm-sdk"],
     "artifact:check": "@php scripts/inspect_artifact.php dist/vedismm-sdk.zip",
-    "quality": ["@cs:check", "@analyse", "@test", "@docs:check", "@examples:check", "@secrets:check", "composer audit --locked --no-interaction"]
+    "operations:sync": "@php scripts/generate_operation_catalog.php",
+    "operations:check": "@php scripts/generate_operation_catalog.php --check",
+    "quality": ["@operations:check", "@cs:check", "@analyse", "@test", "@docs:check", "@examples:check", "@secrets:check", "composer audit --locked --no-interaction"]
   },
   "config": {
     "allow-plugins": false,

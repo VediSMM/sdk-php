@@ -20,6 +20,8 @@ use VediSMM\Service\PreferencesService;
 use VediSMM\Service\ProfileService;
 use VediSMM\Service\SessionsService;
 use VediSMM\Service\SystemService;
+use VediSMM\Service\TrackingAnalyticsService;
+use VediSMM\Service\TrackingLinksService;
 use VediSMM\Service\WebhooksService;
 
 final class VediSMM
@@ -42,6 +44,8 @@ final class VediSMM
         'jobs' => ['deletePostEverywhere', 'getPublicationJob', 'listPublicationJobs', 'publishPost', 'retryPostTargets'],
         'calendar' => ['listCalendarEvents'],
         'analytics' => ['getAnalyticsAudience', 'getAnalyticsNetworks', 'getAnalyticsSummary', 'getAnalyticsTimeseries', 'listAnalyticsPosts'],
+        'trackingLinks' => ['archiveTrackingLink', 'createTrackingLink', 'disableTrackingLink', 'getTrackingLink', 'listTrackingLinks'],
+        'trackingAnalytics' => ['getTrackingAnalyticsGeo', 'getTrackingAnalyticsSummary', 'getTrackingAnalyticsTimeseries', 'listTrackingAnalyticsLinks', 'listTrackingAnalyticsPosts', 'listTrackingAnalyticsSources'],
         'webhooks' => ['createWebhook', 'deleteWebhook', 'getWebhook', 'getWebhookDelivery', 'listWebhookDeliveries', 'listWebhooks', 'retryWebhookDelivery', 'rotateWebhookSecret', 'testWebhook', 'updateWebhook'],
     ];
 
@@ -79,6 +83,10 @@ final class VediSMM
 
     public readonly AnalyticsService $analytics;
 
+    public readonly TrackingLinksService $trackingLinks;
+
+    public readonly TrackingAnalyticsService $trackingAnalytics;
+
     public readonly WebhooksService $webhooks;
 
     public function __construct(?Client $client = null)
@@ -100,7 +108,19 @@ final class VediSMM
         $this->jobs = new JobsService($this->client);
         $this->calendar = new CalendarService($this->client);
         $this->analytics = new AnalyticsService($this->client);
+        $this->trackingLinks = new TrackingLinksService($this->client);
+        $this->trackingAnalytics = new TrackingAnalyticsService($this->client);
         $this->webhooks = new WebhooksService($this->client);
+    }
+
+    public function trackingLinks(): TrackingLinksService
+    {
+        return $this->trackingLinks;
+    }
+
+    public function trackingAnalytics(): TrackingAnalyticsService
+    {
+        return $this->trackingAnalytics;
     }
 
     /** @return array<string, list<string>> */

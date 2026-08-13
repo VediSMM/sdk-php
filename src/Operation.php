@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 namespace VediSMM;
 
+/**
+ * Operation capabilities are open protocol-derived strings. Unknown future
+ * capability names remain available through supports().
+ *
+ * @phpstan-type OperationDefinition array{method: string, path: string, tag: string, authenticated: bool, scopes: list<string>, request_content_types: list<string>, response_statuses: list<string>, capabilities: list<string>}
+ */
 final class Operation
 {
     /**
@@ -24,7 +30,7 @@ final class Operation
         public readonly array $capabilities,
     ) {}
 
-    /** @param array{method: string, path: string, tag: string, authenticated: bool, scopes: list<string>, request_content_types: list<string>, response_statuses: list<string>, capabilities: list<string>} $definition */
+    /** @param OperationDefinition $definition */
     public static function fromArray(string $id, array $definition): self
     {
         return new self(

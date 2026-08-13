@@ -26,6 +26,83 @@ Use named service methods for normal application code. Each one delegates to `Cl
 
 Unknown operations, missing/unused path parameters, invalid headers, unsafe base URLs, and malformed credentials fail before network I/O.
 
+`CallOptions::idempotent($key)` and `CallOptions::ifMatch($etag)` are concise
+factories for the two managed conditional headers. Validation and header
+serialization remain in `Client`.
+
+## Tracking links
+
+Create a short link by sending the original destination unchanged. The SDK
+does not parse, normalize, shorten, append UTM parameters to, or otherwise
+rewrite the URL:
+
+```php
+$created = $sdk->trackingLinks()->create(
+    ['destination_url' => 'https://example.com/article?id=7#details'],
+    CallOptions::idempotent('article-7-v1'),
+);
+```
+
+Use `list()` for one cursor page and `iterate()` for lazy traversal. Read a
+single resource with `get()`. A destination cannot be updated: create a new
+link for a different URL. `disable()` and `archive()` are the only lifecycle
+mutations and require the latest strong ETag:
+
+```php
+$link = $sdk->trackingLinks()->get(42);
+if ($link->etag !== null) {
+    $sdk->trackingLinks()->disable(42, CallOptions::ifMatch($link->etag));
+}
+```
+
+## Tracking analytics
+
+The six endpoints are `summary()`, `timeseries()`, `links()`, `posts()`,
+`sources()`, and `geo()`. All take an array with required `from` and `to` ISO
+dates; `link_id`, `post_id`, and `network` are optional. The three list
+resources also accept `limit`/`cursor` and expose `iterateLinks()`,
+`iteratePosts()`, and `iterateSources()` helpers that preserve the complete
+initial filter while following opaque cursors.
+
+```php
+$geo = $sdk->trackingAnalytics()->geo([
+    'from' => '2026-08-01',
+    'to' => '2026-08-13',
+    'network' => 'vk',
+]);
+```
+
+Geo results contain country aggregates and privacy-minimized city GeoJSON;
+they never expose raw IP addresses. During a dark rollout the API may return a
+normal `ApiException` with status `503` and `errorCode === 'feature_disabled'`.
+
+## Tracking settings for posts
+
+Post creation accepts nested `options.tracking` with both required booleans.
+Both default to `false`. `add_source` is meaningful only when
+`shorten_links` is `true`; the server applies both settings when it creates the
+delivery snapshot and never changes the saved author content.
+
+```php
+$sdk->posts->createPostDraft(
+    [
+        'title' => 'Example',
+        'content' => 'Read https://example.com/article',
+        'options' => [
+            'tracking' => [
+                'shorten_links' => true,
+                'add_source' => true,
+            ],
+        ],
+    ],
+    CallOptions::idempotent('post-draft-1'),
+);
+```
+
+The same typed request form is available on `updatePostDraft()`; pass its `id`
+and current ETag through the second `CallOptions` argument. The original
+single-`CallOptions` form remains supported for compatibility.
+
 ## Errors and retries
 
 Unsuccessful API responses raise `ApiException`. Catch `RateLimitException` for `429` and inspect `retryAfterMs`; catch `PreconditionFailedException` for `412`. `TimeoutException`, `TransportException`, `RedirectException`, and `DecodeException` are separate categories. API errors preserve `status`, `errorCode`, `detail`, validation `errors`, and `requestId` after redaction.

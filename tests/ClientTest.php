@@ -20,6 +20,49 @@ use VediSMM\Value\CallOptions;
 
 final class ClientTest extends TestCase
 {
+    public function testCallOptionsCompositionPreservesEveryExistingField(): void
+    {
+        $rawBody = fopen('php://memory', 'r+b');
+        $sink = fopen('php://memory', 'r+b');
+        self::assertIsResource($rawBody);
+        self::assertIsResource($sink);
+        $options = new CallOptions(
+            path: ['existing' => 1],
+            query: ['existing' => 'query'],
+            body: ['existing' => 'body'],
+            rawBody: $rawBody,
+            multipart: ['file' => 'fixture'],
+            headers: ['X-Correlation-ID' => 'corr_1'],
+            idempotencyKey: 'idempotency-1',
+            ifMatch: '"1"',
+            timeoutMs: 1234,
+            sink: $sink,
+            replayable: true,
+        );
+
+        $composed = $options->with(
+            path: ['id' => 42],
+            query: ['cursor' => 'opaque'],
+            body: ['replacement' => 'body'],
+            replaceBody: true,
+        );
+
+        self::assertSame(['existing' => 1, 'id' => 42], $composed->path);
+        self::assertSame(['existing' => 'query', 'cursor' => 'opaque'], $composed->query);
+        self::assertSame(['replacement' => 'body'], $composed->body);
+        self::assertSame($rawBody, $composed->rawBody);
+        self::assertSame(['file' => 'fixture'], $composed->multipart);
+        self::assertSame(['X-Correlation-ID' => 'corr_1'], $composed->headers);
+        self::assertSame('idempotency-1', $composed->idempotencyKey);
+        self::assertSame('"1"', $composed->ifMatch);
+        self::assertSame(1234, $composed->timeoutMs);
+        self::assertSame($sink, $composed->sink);
+        self::assertTrue($composed->replayable);
+
+        fclose($rawBody);
+        fclose($sink);
+    }
+
     public function testBuildsEncodedAuthenticatedJsonRequestAndPreservesMetadata(): void
     {
         $transport = new FakeTransport([
