@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here. The project follows Semantic Versioning.
 
-## [Unreleased]
+## [0.2.0] - 2026-08-15
 
 - Added typed tracking-link creation, listing, reading, disabling, archiving, and cursor iteration without destination updates or client-side URL rewriting.
 - Added six typed tracking-analytics endpoints plus cursor iterators for link, post, and source aggregates.

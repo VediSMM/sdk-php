@@ -16,7 +16,7 @@ Until the package is published on Packagist, register the official repository on
 
 ```bash
 composer config repositories.vedismm-sdk vcs https://github.com/VediSMM/sdk-php
-composer require vedismm/sdk:0.1.1
+composer require vedismm/sdk:0.2.0
 ```
 
 ## Quick start
